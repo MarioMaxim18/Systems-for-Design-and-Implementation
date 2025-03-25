@@ -5,29 +5,35 @@ import { useRouter } from "next/navigation";
 export default function Home() {
   const router = useRouter();
 
+  const [hasMounted, setHasMounted] = useState(false);
   const [languages, setLanguages] = useState([
-    { id: 1, name: "C++", year: 1985 },
-    { id: 2, name: "Java", year: 1995 },
-    { id: 3, name: "Python", year: 1991 },
+    { id: 1, name: "C++", developer: "Bjarne Stroustrup", year: 1985, description: "Low-level features." },
+    { id: 2, name: "Java", developer: "James Gosling", year: 1995, description: "Enterprise development." },
+    { id: 3, name: "Python", developer: "Guido van Rossum", year: 1991, description: "High-level scripting." }
   ]);
-
-  const [sortBy, setSortBy] = useState(() => {
-    if (typeof window !== "undefined") {
-      return localStorage.getItem("sortBy") || "Name"; 
-    }
-    return "Name";
-  });
+  const [sortBy, setSortBy] = useState("Name");
 
   useEffect(() => {
-    const storedLanguages = localStorage.getItem("languages");
-    if (storedLanguages) {
-      setLanguages(JSON.parse(storedLanguages));
-    }
+    setHasMounted(true);
   }, []);
 
   useEffect(() => {
-    localStorage.setItem("sortBy", sortBy);
-  }, [sortBy]);
+    if (typeof window !== "undefined") {
+      const stored = localStorage.getItem("languages");
+      const sort = localStorage.getItem("sortBy");
+      if (stored) setLanguages(JSON.parse(stored));
+      if (sort) setSortBy(sort);
+    }
+  }, []);
+  
+  useEffect(() => {
+    if (hasMounted) {
+      localStorage.setItem("languages", JSON.stringify(languages));
+      localStorage.setItem("sortBy", sortBy);
+    }
+  }, [languages, sortBy, hasMounted]);
+
+  if (!hasMounted) return null;
 
   function getSortedLanguages() {
     return [...languages].sort((a, b) => {

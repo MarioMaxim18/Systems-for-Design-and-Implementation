@@ -1,11 +1,11 @@
 "use client";
 import { useState, useEffect } from "react";
-import { useRouter, useParams } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 
 export default function EditProgrammingLanguage() {
     const router = useRouter();
-    const params = useParams();
-    const { id } = params;
+    const pathname = usePathname();
+    const id = pathname.split("/").pop();
 
     const [formData, setFormData] = useState({
         name: "",
@@ -37,8 +37,8 @@ export default function EditProgrammingLanguage() {
         // Name validation
         if (!formData.name.trim()) {
             newErrors.name = "Name is required.";
-        } else if (!/^[A-Za-z\s]+$/.test(formData.name)) {
-            newErrors.name = "Name must contain only letters.";
+        } else if (!/^[A-Za-z0-9+\-#\s]+$/.test(formData.name)) {
+            newErrors.name = "Name can contain letters, numbers, spaces, +, - and #.";
         }
 
         // Developer validation

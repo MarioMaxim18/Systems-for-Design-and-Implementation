@@ -19,13 +19,18 @@ export default function EditProgrammingLanguage() {
     useEffect(() => {
         const storedLanguages = localStorage.getItem("languages");
         if (storedLanguages) {
-            const languages = JSON.parse(storedLanguages);
-            const languageToEdit = languages.find(lang => lang.id === Number(id));
-            if (languageToEdit) {
-                setFormData(languageToEdit);
-            }
+          const languages = JSON.parse(storedLanguages);
+          const langToEdit = languages.find((lang) => lang.id === Number(id));
+          if (langToEdit) {
+            setFormData({
+              name: langToEdit.name || "",
+              developer: langToEdit.developer || "",
+              year: langToEdit.year || "",
+              description: langToEdit.description || ""
+            });
+          }
         }
-    }, [id]);
+      }, [id]);
 
     function handleChange(e) {
         setFormData({ ...formData, [e.target.name]: e.target.value });

@@ -13,6 +13,14 @@ test("adds a new language", () => {
   expect(result[0].name).toBe("Rust");
 });
 
+test("adds a new language when languages array is not empty", () => {
+  const newLang = { name: "HTML", developer: "-", year: 1999, description: "-" };
+  const result = addLanguage(newLang, languages);
+  expect(result).toHaveLength(4); 
+  expect(result[3].name).toBe("HTML");
+});
+
+
 test("updates a language by ID", () => {
   const updated = updateLanguage(1, { name: "Ruby", developer: "Matz", year: 1995, description: "Improved" }, languages);
   expect(updated[0].year).toBe(1995);
@@ -43,3 +51,4 @@ test("gets a language by ID", () => {
   const lang = getLanguage(2, languages);
   expect(lang.name).toBe("Java");
 });
+

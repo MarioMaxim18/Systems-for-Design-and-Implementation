@@ -46,9 +46,19 @@ export default function Home() {
     });
   }
 
+  function getStatistics(languages) {
+    const years = languages.map(lang => lang.year);
+
+    const maxYear = Math.max(...years); 
+    const minYear = Math.min(...years);
+
+    return { maxYear, minYear };
+  }
+
+  const { maxYear, minYear } = getStatistics(languages);
+
   return (  
     <div className="flex flex-col items-center justify-center min-h-screen bg-[#131414]">
-      {/* Title & Sort Section */}
       <div className="w-[800px] flex flex-col items-start mb-4">
         <h2 className="text-xl text-white mb-2">My Learning - Activity</h2>
         
@@ -66,6 +76,15 @@ export default function Home() {
             <option value="Name">Name</option>
             <option value="Year">Year</option>
           </select>
+        </div>
+      </div>
+
+      {/* Statistics Display */}
+      <div className="w-[800px] flex flex-col items-start mb-4">
+        <h3 className="text-lg text-white">Statistics</h3>
+        <div className="text-white">
+          <p>Newest Language Year: {maxYear}</p>
+          <p>Oldest Language Year: {minYear}</p>
         </div>
       </div>
 

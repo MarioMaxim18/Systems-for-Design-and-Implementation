@@ -24,15 +24,15 @@ export default function AddProgrammingLanguage() {
         // Name validation
         if (!formData.name.trim()) {
             newErrors.name = "Name is required.";
-        } else if (!/^[A-Za-z\s]+$/.test(formData.name)) {
-            newErrors.name = "Name must contain only letters.";
+        } else if (!/^[A-Za-z0-9+\-#\s]+$/.test(formData.name)) {
+            newErrors.name = "Name can contain letters, numbers, spaces, +, -, and #.";
         }
 
         // Developer validation
         if (!formData.developer.trim()) {
             newErrors.developer = "Developer is required.";
         } else if (!/^[A-Za-z\s]+$/.test(formData.developer)) {
-            newErrors.developer = "Developer name must contain only letters.";
+            newErrors.developer = "Developer name can contain only letters.";
         }
 
         // Year validation

@@ -24,6 +24,8 @@ test("adds a new language when languages array is not empty", () => {
 test("updates a language by ID", () => {
   const updated = updateLanguage(1, { name: "Ruby", developer: "Matz", year: 1995, description: "Improved" }, languages);
   expect(updated[0].year).toBe(1995);
+  expect(updated[0].name).toBe("Ruby");
+  expect(updated[0].developer).toBe("Matz");
 });
 
 test("removes a language by ID", () => {

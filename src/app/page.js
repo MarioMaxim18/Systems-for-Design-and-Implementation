@@ -12,8 +12,7 @@ export default function Home() {
   const router = useRouter();
   const pathname = usePathname(); 
 
-  // Manage state for using Faker data or hardcoded data
-  const [useFakeData, setUseFakeData] = useState(false);
+  const [useFakeData, setUseFakeData] = useState(true);
   const [languages, setLanguages] = useState([]);
   const [sortBy, setSortBy] = useState("ID");
   
@@ -58,12 +57,12 @@ export default function Home() {
   // Sort function
   function getSortedLanguages() {
     return [...languages].sort((a, b) => {
-      if (sortBy === "Name") {
-        return a.name.localeCompare(b.name);
-      } else if (sortBy === "Year") {
-        return a.year - b.year;
-      } else if (sortBy === "ID") {
+      if (sortBy === "ID") {
         return a.id - b.id;
+      } else if (sortBy === "Name") {
+        return a.name.localeCompare(b.name);
+      }  else if (sortBy === "Year") {
+        return a.year - b.year;
       }
       return 0;
     });
@@ -115,10 +114,10 @@ export default function Home() {
             className="px-3 py-2 rounded bg-white border-black"
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value)}
-          >
+          > 
+            <option value="ID">ID</option>
             <option value="Name">Name</option>
             <option value="Year">Year</option>
-            <option value="ID">ID</option>
           </select>
         </div>
       </div>
@@ -136,15 +135,19 @@ export default function Home() {
       <div className="bg-[#515151] p-8 rounded-lg w-[800px]">
         {/* Languages Table */}
         <div className="rounded-lg w-full">
-          {languages.length > 0 ? (
-            currentLanguages.map((lang) => (
-              <div key={lang.id} className="flex items-center justify-between border-b border-black py-2">
+        {languages.length > 0 ? (
+          currentLanguages.map((lang) => {
+            const isNewest = lang.year === maxYear;
+            const isOldest = lang.year === minYear;
+
+            return (
+              <div key={lang.id} className={`flex items-center justify-between border-b border-black py-2 ${isNewest ? 'bg-green-500' : ''} ${isOldest ? 'bg-red-500' : ''}`}>
                 <div>
-                <p className="text-white font-semibold text-lg">{lang.name}</p>
-                <p className="text-gray-300 text-sm">ID: #{lang.id}</p>
-                <p className="text-gray-300 text-sm">Developer: {lang.developer}</p>
-                <p className="text-gray-300 text-sm">Year: {lang.year}</p>
-                <p className="text-gray-300 text-sm">Description: {lang.description}</p>
+                  <p className="text-white font-semibold text-lg">{lang.name}</p>
+                  <p className="text-gray-300 text-sm">ID: #{lang.id}</p>
+                  <p className="text-gray-300 text-sm">Developer: {lang.developer}</p>
+                  <p className="text-gray-300 text-sm">Year: {lang.year}</p>
+                  <p className="text-gray-300 text-sm">Description: {lang.description}</p>
                 </div>
                 <div>
                   <button 
@@ -167,11 +170,12 @@ export default function Home() {
                   </button>
                 </div>
               </div>
-            ))
-          ) : (
-            <p className="text-white text-center">No programming languages added yet.</p>
-          )}
-        </div>
+            );
+          })
+        ) : (
+          <p className="text-white text-center">No programming languages added yet.</p>
+        )}
+      </div>
 
         {/* Pagination Controls */}
         <div className="flex justify-between mt-4">
@@ -199,7 +203,7 @@ export default function Home() {
         </div>
       </div>
       {/* Chart Section */}
-        <div className="w-[800px] h-[300px] mt-4 mb-4 bg-white p-4 rounded-lg">
+        <div className="w-[800px] h-[300px] mt-4 mb-5 bg-white p-4 rounded-lg">
           <h3 className="text-black text-lg mb-2">Languages per Decade</h3>
           <ResponsiveContainer width="100%" height="100%">
           <BarChart data={chartData} margin={{ bottom: 20 }}>

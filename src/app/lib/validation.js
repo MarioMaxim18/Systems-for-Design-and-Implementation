@@ -1,4 +1,3 @@
-// Validation logic for form fields
 export function validateForm(formData) {
     let newErrors = {};
   

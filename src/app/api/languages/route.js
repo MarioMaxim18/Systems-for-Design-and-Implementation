@@ -1,5 +1,3 @@
-// src/app/api/languages/route.js
-
 import { NextResponse } from 'next/server';
 import { getAllLanguages, addLanguage, updateLanguage, deleteLanguage } from '../../../data/data.js';
 
@@ -21,8 +19,8 @@ export async function POST(request) {
   }
 }
 
-// PUT API: Update a language by ID
-export async function PUT(request) {
+// PATCH API: Update a language by ID
+export async function PATCH(request) {
   const { searchParams } = new URL(request.url);
   const id = searchParams.get('id');
   

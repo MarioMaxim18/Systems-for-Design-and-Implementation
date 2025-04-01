@@ -19,7 +19,6 @@ export default function AddProgrammingLanguage() {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   }
 
-  // Handle form submission to API
   async function handleSubmit(e) {
     e.preventDefault();
 

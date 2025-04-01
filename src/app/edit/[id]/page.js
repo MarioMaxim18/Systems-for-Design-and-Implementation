@@ -1,4 +1,5 @@
 "use client";
+
 import { useState, useEffect } from "react";
 import { useRouter, usePathname } from "next/navigation";
 
@@ -15,22 +16,28 @@ export default function EditProgrammingLanguage() {
     });
 
     const [errors, setErrors] = useState({});
+    const [isLoading, setIsLoading] = useState(false);
 
+    // Fetch language data when component mounts
     useEffect(() => {
-        const storedLanguages = localStorage.getItem("languages");
-        if (storedLanguages) {
-          const languages = JSON.parse(storedLanguages);
-          const langToEdit = languages.find((lang) => lang.id === Number(id));
-          if (langToEdit) {
-            setFormData({
-              name: langToEdit.name || "",
-              developer: langToEdit.developer || "",
-              year: langToEdit.year || "",
-              description: langToEdit.description || ""
-            });
-          }
+        async function fetchLanguage() {
+            try {
+                const response = await fetch(`/api/languages?id=${id}`);
+                if (response.ok) {
+                    const data = await response.json();
+                    setFormData({
+                        name: data.name || "",
+                        developer: data.developer || "",
+                        year: data.year || "",
+                        description: data.description || ""
+                    });
+                }
+            } catch (error) {
+                console.error("Fetch error:", error);
+            }
         }
-      }, [id]);
+        fetchLanguage();
+    }, [id]);
 
     function handleChange(e) {
         setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -38,54 +45,35 @@ export default function EditProgrammingLanguage() {
 
     function validateForm() {
         let newErrors = {};
-
-        // Name validation
-        if (!formData.name.trim()) {
-            newErrors.name = "Name is required.";
-        } else if (!/^[A-Za-z0-9+\-#\s]+$/.test(formData.name)) {
-            newErrors.name = "Name can contain letters, numbers, spaces, +, - and #.";
-        }
-
-        // Developer validation
-        if (!formData.developer.trim()) {
-            newErrors.developer = "Developer is required.";
-        } else if (!/^[A-Za-z\s]+$/.test(formData.developer)) {
-            newErrors.developer = "Developer name must contain only letters.";
-        }
-
-        // Year validation
-        if (!formData.year) {
-            newErrors.year = "Year is required.";
-        } else if (isNaN(formData.year) || formData.year < 1900 || formData.year > new Date().getFullYear()) {
-            newErrors.year = "Enter a valid year (1900 - " + new Date().getFullYear() + ").";
-        }
-
-        // Description validation
-        if (!formData.description.trim()) {
-            newErrors.description = "Description is required.";
-        } else if (formData.description.length < 5) {
-            newErrors.description = "Description must be at least 5 characters long.";
-        }
-
+        // ... keep your existing validation logic ...
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
     }
 
-
-    function handleSubmit(e) {
+    async function handleSubmit(e) {
         e.preventDefault();
-        
         if (!validateForm()) return;
 
-        const storedLanguages = localStorage.getItem("languages");
-        if (storedLanguages) {
-            let languages = JSON.parse(storedLanguages);
-            languages = languages.map(lang => 
-                lang.id === Number(id) ? { ...formData, id: Number(id) } : lang
-            );
+        setIsLoading(true);
 
-            localStorage.setItem("languages", JSON.stringify(languages));
-            router.push("/");
+        try {
+            const response = await fetch(`/api/languages?id=${id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(formData)
+            });
+
+            if (response.ok) {
+                // This ensures the home page gets fresh data
+                window.location.href = "/"; // Full page reload
+            } else {
+                alert("Failed to update. Please try again.");
+            }
+        } catch (error) {
+            console.error("Update error:", error);
+            alert("An error occurred during update.");
+        } finally {
+            setIsLoading(false);
         }
     }
 
@@ -157,7 +145,7 @@ export default function EditProgrammingLanguage() {
                 
                 {/* Done Button */}
                 <div className="flex justify-center">
-                    <button type="submit" className="px-6 py-2 mt-4 bg-white hover:bg-gray-300">Save</button>
+                <button type="submit" className="px-6 py-2 mt-4 bg-white hover:bg-gray-300">Save</button>
                 </div>
             </form>
         </div>

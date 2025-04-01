@@ -1,20 +1,17 @@
 "use client";
+
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { usePathname } from "next/navigation";
-import generateFakeData from "../utils/generateFakeData"; 
-import {
-  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer
-} from 'recharts';
-
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 export default function Home() {
   const router = useRouter();
   const pathname = usePathname(); 
 
-  const [useFakeData, setUseFakeData] = useState(true);
   const [languages, setLanguages] = useState([]);
   const [sortBy, setSortBy] = useState("ID");
+  const [refreshKey, setRefreshKey] = useState(0);
   
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
@@ -27,32 +24,21 @@ export default function Home() {
     setHasMounted(true);
   }, []);
 
-  // Effect to load either Faker data or hardcoded data
+  // Effect to load data from the API
   useEffect(() => {
-    if (useFakeData) {
-      const storedLanguages = localStorage.getItem("languages");
-      if (storedLanguages) {
-        setLanguages(JSON.parse(storedLanguages));
-      } else {
-        const fakeData = generateFakeData(100);
-        setLanguages(fakeData);
-        localStorage.setItem("languages", JSON.stringify(fakeData));
-      }
-    } else {
-      const storedLanguages = localStorage.getItem("languages");
-      if (storedLanguages) {
-        setLanguages(JSON.parse(storedLanguages));
-      } else {
-        const hardcodedData = [
-          { id: 1, name: "C++", developer: "Bjarne Stroustrup", year: 1985, description: "Low-level features." },
-          { id: 2, name: "Java", developer: "James Gosling", year: 1995, description: "Enterprise development." },
-          { id: 3, name: "Python", developer: "Guido van Rossum", year: 1991, description: "High-level scripting." }
-        ];
-        setLanguages(hardcodedData);
-        localStorage.setItem("languages", JSON.stringify(hardcodedData));
+    async function fetchLanguages() {
+      try {
+        const response = await fetch(`/api/languages?t=${Date.now()}`);
+        if (response.ok) {
+          const data = await response.json();
+          setLanguages(data);
+        }
+      } catch (error) {
+        console.error("Fetch error:", error);
       }
     }
-  }, [useFakeData, pathname]);
+    fetchLanguages();
+  }, [pathname, refreshKey]);
 
   // Sort function
   function getSortedLanguages() {
@@ -61,7 +47,7 @@ export default function Home() {
         return a.id - b.id;
       } else if (sortBy === "Name") {
         return a.name.localeCompare(b.name);
-      }  else if (sortBy === "Year") {
+      } else if (sortBy === "Year") {
         return a.year - b.year;
       }
       return 0;

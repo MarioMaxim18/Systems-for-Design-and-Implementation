@@ -1,9 +1,22 @@
 import { NextResponse } from 'next/server';
 import { getAllLanguages, addLanguage, updateLanguage, deleteLanguage } from '../../../data/data.js';
 
-// GET API: Retrieve all languages
-export async function GET() {
-  const languages = getAllLanguages();
+
+// GET API: Retrieve all languages with sorting option
+export async function GET(request) {
+  const { searchParams } = new URL(request.url);
+  const sortBy = searchParams.get('sortBy') || "ID";
+  
+  let languages = getAllLanguages();
+
+  if (sortBy === "Name") {
+    languages = languages.sort((a, b) => a.name.localeCompare(b.name));
+  } else if (sortBy === "Year") {
+    languages = languages.sort((a, b) => a.year - b.year);
+  } else if (sortBy === "ID") {
+    languages = languages.sort((a, b) => a.id - b.id);
+  }
+
   return NextResponse.json(languages);
 }
 

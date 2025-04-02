@@ -28,7 +28,7 @@ export default function Home() {
   useEffect(() => {
     async function fetchLanguages() {
       try {
-        const response = await fetch(`/api/languages?t=${Date.now()}`);
+        const response = await fetch(`/api/languages?sortBy=${sortBy}&t=${Date.now()}`);
         if (response.ok) {
           const data = await response.json();
           setLanguages(data);
@@ -38,21 +38,7 @@ export default function Home() {
       }
     }
     fetchLanguages();
-  }, [pathname, refreshKey]);
-
-  // Sort function
-  function getSortedLanguages() {
-    return [...languages].sort((a, b) => {
-      if (sortBy === "ID") {
-        return a.id - b.id;
-      } else if (sortBy === "Name") {
-        return a.name.localeCompare(b.name);
-      } else if (sortBy === "Year") {
-        return a.year - b.year;
-      }
-      return 0;
-    });
-  }
+  }, [pathname, refreshKey, sortBy]);
 
   // Get statistics
   function getStatistics(languages) {
@@ -69,7 +55,7 @@ export default function Home() {
   // Pagination
   const indexOfLastLanguage = currentPage * languagesPerPage;
   const indexOfFirstLanguage = indexOfLastLanguage - languagesPerPage;
-  const currentLanguages = getSortedLanguages().slice(indexOfFirstLanguage, indexOfLastLanguage);
+  const currentLanguages = languages.slice(indexOfFirstLanguage, indexOfLastLanguage);
 
   if (!hasMounted) return null;
 

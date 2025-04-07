@@ -54,11 +54,25 @@ export async function PATCH(request) {
 
 // DELETE API: Delete a language by ID
 export async function DELETE(request) {
-  const { id } = request.nextUrl.searchParams;
   try {
+    const { searchParams } = new URL(request.url);
+    const id = searchParams.get('id');
+    
+    if (!id) {
+      return NextResponse.json(
+        { error: "ID parameter is required" },
+        { status: 400 }
+      );
+    }
+
     const deletedLang = deleteLanguage(parseInt(id));
     return NextResponse.json(deletedLang);
+    
   } catch (error) {
-    return NextResponse.json({ error: "Failed to delete language" }, { status: 400 });
+    console.error('Delete error:', error);
+    return NextResponse.json(
+      { error: "Failed to delete language" },
+      { status: 500 }
+    );
   }
 }

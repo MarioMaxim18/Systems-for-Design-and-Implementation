@@ -129,20 +129,40 @@ export default function Home() {
                     Edit
                   </button>
                   <button 
-                    className="bg-white text-black px-2 py-1 rounded"
-                    onClick={() => {
-                      const confirmDelete = window.confirm(`Are you sure you want to delete "${lang.name}"?`);
-                      if (confirmDelete) {
+                  className="bg-white text-black px-2 py-1 rounded"
+                  onClick={async () => {
+                    const confirmDelete = window.confirm(`Are you sure you want to delete "${lang.name}"?`);
+                    if (confirmDelete) {
+                      try {
+                        const response = await fetch(`/api/languages?id=${lang.id}`, {
+                          method: 'DELETE',
+                          headers: {
+                            'Content-Type': 'application/json',
+                          },
+                        });
+                        
+                        if (!response.ok) {
+                          throw new Error(`HTTP error! status: ${response.status}`);
+                        }
+
+                        const result = await response.json();
+                        console.log('Delete successful:', result);
+                        
                         const updatedLanguages = languages.filter(l => l.id !== lang.id);
                         setLanguages(updatedLanguages);
+                        
+                      } catch (error) {
+                        console.error('Error deleting language:', error);
+                        alert('Failed to delete language. Please check console for details.');
                       }
-                    }}
+                    }
+                  }}
                   >
                     Delete
                   </button>
                 </div>
               </div>
-            );
+            );  
           })
         ) : (
           <p className="text-white text-center">No programming languages added yet.</p>

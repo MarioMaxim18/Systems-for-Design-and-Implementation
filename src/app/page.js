@@ -99,6 +99,23 @@ export default function Home() {
     }
   }, [isOnline, serverUp]);
 
+  useEffect(() => {
+    const ws = new WebSocket("ws://localhost:4001");
+  
+    ws.onmessage = (event) => {
+      const message = JSON.parse(event.data);
+      if (message.type === "new_entity") {
+        setLanguages((prev) => {
+          const updated = [message.data, ...prev];
+          setHasMore(true); 
+          return updated;
+        });
+      }
+    };
+  
+    return () => ws.close();
+  }, []);
+
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-[#131414]">
       {!isOnline && (
@@ -145,11 +162,8 @@ export default function Home() {
         <div className="rounded-lg w-full">
         {languages.length > 0 ? (
           languages.map((lang) => {
-            const isNewest = lang.year === maxYear;
-            const isOldest = lang.year === minYear;
-
             return (
-              <div key={lang.id} className={`flex items-center justify-between border-b border-black py-2 ${isNewest ? 'bg-green-500' : ''} ${isOldest ? 'bg-red-500' : ''}`}>
+              <div key={lang.id} className={`flex items-center justify-between border-b border-black py-2`}>
               <div className="flex flex-col">
                 <p className="text-white font-semibold text-lg">{lang.name}</p>
                 <p className="text-gray-300 text-sm">ID: #{lang.id}</p>

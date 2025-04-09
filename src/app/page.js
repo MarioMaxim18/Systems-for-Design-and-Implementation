@@ -4,11 +4,15 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { usePathname } from "next/navigation";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import generateFakeData from "../utils/generateFakeData"; 
+import { useConnectionStatus } from "../hooks/useConnectionStatus";
+import { syncQueue } from "../utils/offlineQueue";
 
 export default function Home() {
   const router = useRouter();
   const pathname = usePathname(); 
 
+  const [useFakeData, setUseFakeData] = useState(true);
   const [languages, setLanguages] = useState([]);
   const [sortBy, setSortBy] = useState("ID");
   const [refreshKey, setRefreshKey] = useState(0);
@@ -27,18 +31,40 @@ export default function Home() {
   // Effect to load data from the API
   useEffect(() => {
     async function fetchLanguages() {
-      try {
-        const response = await fetch(`/api/languages?sortBy=${sortBy}&t=${Date.now()}`);
-        if (response.ok) {
-          const data = await response.json();
-          setLanguages(data);
+      if (useFakeData) {
+        const storedLanguages = localStorage.getItem("languages");
+        if (storedLanguages) {
+          setLanguages(JSON.parse(storedLanguages));
+        } else {
+          const fakeData = generateFakeData(100);
+          setLanguages(fakeData);
+          localStorage.setItem("languages", JSON.stringify(fakeData));
         }
-      } catch (error) {
-        console.error("Fetch error:", error);
+      } else {
+        try {
+          const response = await fetch(`/api/languages?sortBy=${sortBy}&t=${Date.now()}`);
+          if (response.ok) {
+            const data = await response.json();
+            setLanguages(data);
+          }
+        } catch (error) {
+          console.error("Fetch error:", error);
+        }
       }
     }
     fetchLanguages();
   }, [pathname, refreshKey, sortBy]);
+
+  const { isOnline, serverUp } = useConnectionStatus();
+
+  useEffect(() => {
+    if (isOnline && serverUp) {
+      syncQueue(() => {
+        setRefreshKey((k) => k + 1);
+      });
+    }
+  }, [isOnline, serverUp]);
+
 
   // Get statistics
   function getStatistics(languages) {
@@ -77,6 +103,18 @@ export default function Home() {
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-[#131414]">
+      {/* Status banner */}
+      {!isOnline && (
+      <div className="fixed top-0 left-0 w-full bg-red-600 text-white text-center py-2 z-50 shadow-md">
+        ⚠️ You are <strong>offline</strong> — check your internet connection.
+      </div>
+      )}
+
+      {isOnline && !serverUp && (
+        <div className="fixed top-0 left-0 w-full bg-yellow-400 text-black text-center py-2 z-50 shadow-md">
+          ⚠️ You are online, but the <strong>server is down</strong>.
+        </div>
+      )}
       <div className="w-[800px] flex flex-col items-start mb-4">
         <h2 className="text-xl text-white mb-2">My Learning - Activity</h2>
 
@@ -114,21 +152,23 @@ export default function Home() {
 
             return (
               <div key={lang.id} className={`flex items-center justify-between border-b border-black py-2 ${isNewest ? 'bg-green-500' : ''} ${isOldest ? 'bg-red-500' : ''}`}>
-                <div>
-                  <p className="text-white font-semibold text-lg">{lang.name}</p>
-                  <p className="text-gray-300 text-sm">ID: #{lang.id}</p>
-                  <p className="text-gray-300 text-sm">Developer: {lang.developer}</p>
-                  <p className="text-gray-300 text-sm">Year: {lang.year}</p>
-                  <p className="text-gray-300 text-sm">Description: {lang.description}</p>
-                </div>
-                <div>
-                  <button 
-                    className="bg-white text-black px-2 py-1 mr-2 rounded" 
-                    onClick={() => router.push(`/edit/${lang.id}`)}
-                  >
-                    Edit
-                  </button>
-                  <button 
+              <div className="flex flex-col">
+                <p className="text-white font-semibold text-lg">{lang.name}</p>
+                <p className="text-gray-300 text-sm">ID: #{lang.id}</p>
+                <p className="text-gray-300 text-sm">Developer: {lang.developer}</p>
+                <p className="text-gray-300 text-sm">Year: {lang.year}</p>
+                <p className="text-gray-300 text-sm">Description: {lang.description}</p>
+              </div>
+              
+              <div className="flex space-x-2">
+                <button 
+                  className="bg-white text-black px-2 py-1 rounded"
+                  onClick={() => router.push(`/edit/${lang.id}`)}
+                >
+                  Edit
+                </button>
+                
+                <button 
                   className="bg-white text-black px-2 py-1 rounded"
                   onClick={async () => {
                     const confirmDelete = window.confirm(`Are you sure you want to delete "${lang.name}"?`);
@@ -140,28 +180,28 @@ export default function Home() {
                             'Content-Type': 'application/json',
                           },
                         });
-                        
+
                         if (!response.ok) {
                           throw new Error(`HTTP error! status: ${response.status}`);
                         }
 
                         const result = await response.json();
                         console.log('Delete successful:', result);
-                        
+
                         const updatedLanguages = languages.filter(l => l.id !== lang.id);
                         setLanguages(updatedLanguages);
-                        
+
                       } catch (error) {
                         console.error('Error deleting language:', error);
                         alert('Failed to delete language. Please check console for details.');
                       }
                     }
                   }}
-                  >
-                    Delete
-                  </button>
-                </div>
+                >
+                  Delete
+                </button>
               </div>
+            </div>
             );  
           })
         ) : (

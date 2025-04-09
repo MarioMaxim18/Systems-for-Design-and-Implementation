@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { usePathname } from "next/navigation";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
@@ -10,53 +10,87 @@ import { syncQueue } from "../utils/offlineQueue";
 
 export default function Home() {
   const router = useRouter();
-  const pathname = usePathname(); 
+  const pathname = usePathname();
 
-  const [useFakeData, setUseFakeData] = useState(true);
-  const [languages, setLanguages] = useState([]);
-  const [sortBy, setSortBy] = useState("ID");
+  const [useFakeData] = useState(false); 
+  const [languages, setLanguages] = useState([]); 
+  const [sortBy, setSortBy] = useState("ID"); 
   const [refreshKey, setRefreshKey] = useState(0);
-  
-  // Pagination state
-  const [currentPage, setCurrentPage] = useState(1);
-  const languagesPerPage = 4;
 
-  // To handle mounting issues with useEffect
-  const [hasMounted, setHasMounted] = useState(false);
+  const languagesPerPage = 10;
+  const [hasMore, setHasMore] = useState(true); 
+  const observer = useRef();
 
   useEffect(() => {
-    setHasMounted(true);
-  }, []);
-
-  // Effect to load data from the API
-  useEffect(() => {
-    async function fetchLanguages() {
-      if (useFakeData) {
-        const storedLanguages = localStorage.getItem("languages");
-        if (storedLanguages) {
-          setLanguages(JSON.parse(storedLanguages));
-        } else {
-          const fakeData = generateFakeData(100);
-          setLanguages(fakeData);
-          localStorage.setItem("languages", JSON.stringify(fakeData));
-        }
-      } else {
+    if (useFakeData) {
+      const fakeData = generateFakeData(100);
+      setLanguages(fakeData.slice(0, languagesPerPage)); 
+    } else {
+      async function fetchLanguages() {
         try {
           const response = await fetch(`/api/languages?sortBy=${sortBy}&t=${Date.now()}`);
           if (response.ok) {
             const data = await response.json();
-            setLanguages(data);
+            setLanguages(data.slice(0, languagesPerPage));
           }
         } catch (error) {
           console.error("Fetch error:", error);
         }
       }
+      fetchLanguages();
     }
-    fetchLanguages();
-  }, [pathname, refreshKey, sortBy]);
+  }, [useFakeData, refreshKey, sortBy]);
+
+  useEffect(() => {
+    const loadMore = (entries) => {
+      if (entries[0].isIntersecting) {
+        loadMoreLanguages();
+      }
+    };
+
+    observer.current = new IntersectionObserver(loadMore, { rootMargin: "100px" });
+
+    const target = document.getElementById("load-more-target");
+    if (target) observer.current.observe(target);
+
+    return () => observer.current.disconnect();
+  }, [languages]);
+
+  const loadMoreLanguages = () => {
+    if (!hasMore) return; 
+
+    const newData = useFakeData ? generateFakeData(languagesPerPage) : [];
+    setLanguages((prev) => [...prev, ...newData]);
+
+    if (languages.length + newData.length >= 100) {
+      setHasMore(false);
+    }
+  };
+
+  function getStatistics(languages) {
+    const years = languages.map(lang => lang.year);
+    const maxYear = Math.max(...years);
+    const minYear = Math.min(...years);
+    return { maxYear, minYear };
+  }
+
+  const { maxYear, minYear } = getStatistics(languages);
+
+  function getLanguagesByDecade(languages) {
+    const grouped = {};
+    languages.forEach((lang) => {
+      const decade = Math.floor(lang.year / 10) * 10;
+      grouped[decade] = (grouped[decade] || 0) + 1;
+    });
+    return Object.entries(grouped)
+      .sort((a, b) => a[0] - b[0])
+      .map(([decade, count]) => ({ decade, count }));
+  }
+
+  const chartData = getLanguagesByDecade(languages);
 
   const { isOnline, serverUp } = useConnectionStatus();
-
+ 
   useEffect(() => {
     if (isOnline && serverUp) {
       syncQueue(() => {
@@ -65,49 +99,12 @@ export default function Home() {
     }
   }, [isOnline, serverUp]);
 
-
-  // Get statistics
-  function getStatistics(languages) {
-    const years = languages.map(lang => lang.year);
-
-    const maxYear = Math.max(...years); 
-    const minYear = Math.min(...years);
-
-    return { maxYear, minYear };
-  }
-
-  const { maxYear, minYear } = getStatistics(languages);
-
-  // Pagination
-  const indexOfLastLanguage = currentPage * languagesPerPage;
-  const indexOfFirstLanguage = indexOfLastLanguage - languagesPerPage;
-  const currentLanguages = languages.slice(indexOfFirstLanguage, indexOfLastLanguage);
-
-  if (!hasMounted) return null;
-
-  // Groups programming languages by the decade they were created
-  function getLanguagesByDecade(languages) {
-    const grouped = {};
-  
-    for (const lang of languages) {
-      const decade = Math.floor(lang.year / 10) * 10;
-      grouped[decade] = (grouped[decade] || 0) + 1;
-    }
-  
-    return Object.entries(grouped)
-      .sort((a, b) => a[0] - b[0])
-      .map(([decade, count]) => ({ decade, count }));
-  }
-  
-  const chartData = getLanguagesByDecade(languages);
-
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-[#131414]">
-      {/* Status banner */}
       {!isOnline && (
-      <div className="fixed top-0 left-0 w-full bg-red-600 text-white text-center py-2 z-50 shadow-md">
-        ⚠️ You are <strong>offline</strong> — check your internet connection.
-      </div>
+        <div className="fixed top-0 left-0 w-full bg-red-600 text-white text-center py-2 z-50 shadow-md">
+          ⚠️ You are <strong>offline</strong> — check your internet connection.
+        </div>
       )}
 
       {isOnline && !serverUp && (
@@ -115,6 +112,7 @@ export default function Home() {
           ⚠️ You are online, but the <strong>server is down</strong>.
         </div>
       )}
+
       <div className="w-[800px] flex flex-col items-start mb-4">
         <h2 className="text-xl text-white mb-2">My Learning - Activity</h2>
 
@@ -146,7 +144,7 @@ export default function Home() {
         {/* Languages Table */}
         <div className="rounded-lg w-full">
         {languages.length > 0 ? (
-          currentLanguages.map((lang) => {
+          languages.map((lang) => {
             const isNewest = lang.year === maxYear;
             const isOldest = lang.year === minYear;
 
@@ -159,7 +157,6 @@ export default function Home() {
                 <p className="text-gray-300 text-sm">Year: {lang.year}</p>
                 <p className="text-gray-300 text-sm">Description: {lang.description}</p>
               </div>
-              
               <div className="flex space-x-2">
                 <button 
                   className="bg-white text-black px-2 py-1 rounded"
@@ -167,7 +164,7 @@ export default function Home() {
                 >
                   Edit
                 </button>
-                
+
                 <button 
                   className="bg-white text-black px-2 py-1 rounded"
                   onClick={async () => {
@@ -202,36 +199,17 @@ export default function Home() {
                 </button>
               </div>
             </div>
-            );  
+            );
           })
         ) : (
           <p className="text-white text-center">No programming languages added yet.</p>
         )}
-      </div>
-
-        {/* Pagination Controls */}
-        <div className="flex justify-between mt-4">
-          <button
-            onClick={() => setCurrentPage(currentPage - 1)}
-            disabled={currentPage === 1}
-            className="px-4 py-2 bg-white text-black rounded hover:bg-gray-300"
-          >
-            Previous
-          </button>
-          <span className="text-white">
-            Page {currentPage}
-          </span>
-          <button
-            onClick={() => setCurrentPage(currentPage + 1)}
-            disabled={currentPage * languagesPerPage >= languages.length}
-            className="px-4 py-2 bg-white text-black rounded hover:bg-gray-300"
-          >
-            Next
-          </button>
         </div>
         {/* Add Button */}
-        <div className="flex justify-center mt-4">
-          <button className="px-6 py-2 bg-white hover:bg-gray-300" onClick={() => router.push("/add")}>Add</button>
+        <div id="load-more-target" className="flex justify-center mt-4">
+          {hasMore && (
+            <button className="px-6 py-2 bg-white hover:bg-gray-300" onClick={() => router.push("/add")}>Add</button>
+          )}
         </div>
       </div>
       {/* Chart Section */}
@@ -246,7 +224,7 @@ export default function Home() {
             <Bar dataKey="count" fill="#8884d8" />
           </BarChart>
         </ResponsiveContainer>
-        </div>
+      </div>
     </div>
   );
 }

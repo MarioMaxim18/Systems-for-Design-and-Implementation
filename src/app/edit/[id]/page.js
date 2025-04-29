@@ -1,159 +1,158 @@
 "use client";
 
+import Navbar from "../../../components/Navbar";
 import { useState, useEffect } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { validateForm } from "../../../lib/validation";
 
 export default function EditProgrammingLanguage() {
-    const router = useRouter();
-    const pathname = usePathname();
-    const id = pathname.split("/").pop();  
+  const router = useRouter();
+  const pathname = usePathname();
+  const id = pathname.split("/").pop();
 
-    const [formData, setFormData] = useState({
-        name: "",
-        developer: "",
-        year: "",
-        description: ""
-    });
+  const [formData, setFormData] = useState({
+    name: "",
+    developer: "",
+    year: "",
+    description: "",
+  });
+  const [errors, setErrors] = useState({});
+  const [isLoading, setIsLoading] = useState(false);
 
-    const [errors, setErrors] = useState({});
-    const [isLoading, setIsLoading] = useState(false);
-
-    useEffect(() => {
-        const fetchLanguage = async () => {
-            try {
-                const response = await fetch(`/api/languages?id=${id}`);
-                if (response.ok) {
-                    const data = await response.json();
-                    const langToEdit = Array.isArray(data) ? 
-                        data.find(lang => lang._id === Number(id)) : data;
-                    
-                    if (langToEdit) {
-                        setFormData({
-                            name: langToEdit.name || "",
-                            developer: langToEdit.developer || "",
-                            year: langToEdit.year || "",
-                            description: langToEdit.description || ""
-                        });
-                    }
-                } else {
-                    console.error("Failed to fetch language");
-                }
-            } catch (error) {
-                console.error("Error fetching language:", error);
-            }
-        };
-        fetchLanguage();
-    }, [id]);
-
-    function handleChange(e) {
-        setFormData({ ...formData, [e.target.name]: e.target.value });
-    }
-
-    async function handleSubmit(e) {
-        e.preventDefault();
-
-        const newErrors = validateForm(formData);
-        setErrors(newErrors);
-
-        if (Object.keys(newErrors).length > 0) return;
-
-        setIsLoading(true);
-
-        try {
-            const response = await fetch(`/api/languages?id=${id}`, {
-                method: 'PATCH',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(formData)
-            });
-
-            if (response.ok) {
-                window.location.href = "/";
-            } else {
-                alert("Failed to update. Please try again.");
-            }
-        } catch (error) {
-            console.error("Update error:", error);
-            alert("An error occurred during the update.");
-        } finally {
-            setIsLoading(false);
+  useEffect(() => {
+    async function fetchLanguage() {
+      try {
+        const response = await fetch(`/api/languages?id=${id}`);
+        if (response.ok) {
+          const language = await response.json();
+          setFormData({
+            name: language.name || "",
+            developer: language.developer || "",
+            year: language.year || "",
+            description: language.description || "",
+          });
         }
+      } catch (error) {
+        console.error("Fetch error:", error);
+      }
     }
 
-    return (
-        <div className="flex flex-col items-center justify-center min-h-screen bg-[#131414]">
-            <div className="w-[800px] flex flex-col items-start mb-4">
-                <h2 className="text-xl text-white mb-2">Edit Programming Language</h2>
-            </div>
+    fetchLanguage();
+  }, [id]);
 
-            {/* Form Container */}
-            <form onSubmit={handleSubmit} className="bg-[#515151] p-8 rounded-lg w-[800px] space-y-4">
-                {/* Name Input */}
-                <div className="flex items-center justify-between">
-                    <label className="text-white text-lg">Name:</label>
-                    <input
-                        type="text"
-                        name="name"
-                        value={formData.name}
-                        onChange={handleChange}
-                        placeholder="(Required: text)"
-                        className="w-2/3 px-3 py-2 rounded bg-white border-black"
-                        required
-                    />
-                </div>
-                {errors.name && <p className="text-red-400 text-sm">{errors.name}</p>}
+  function handleChange(e) {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  }
 
-                {/* Developer Input */}
-                <div className="flex items-center justify-between">
-                    <label className="text-white text-lg">Developer:</label>
-                    <input
-                        type="text"
-                        name="developer"
-                        value={formData.developer}
-                        onChange={handleChange}
-                        placeholder="(Required: text)"
-                        className="w-2/3 px-3 py-2 rounded bg-white border-black"
-                        required
-                    />
-                </div>
-                {errors.developer && <p className="text-red-400 text-sm">{errors.developer}</p>}
+  async function handleSubmit(e) {
+    e.preventDefault();
+    const newErrors = validateForm(formData);
+    setErrors(newErrors);
+    if (Object.keys(newErrors).length > 0) return;
 
-                {/* Year Released Input */}
-                <div className="flex items-center justify-between">
-                    <label className="text-white text-lg">Year released:</label>
-                    <input
-                        type="number"
-                        name="year"
-                        value={formData.year}
-                        onChange={handleChange}
-                        placeholder="(Required: valid year)"
-                        className="w-2/3 px-3 py-2 rounded bg-white border-black"
-                        required
-                    />
-                </div>
-                {errors.year && <p className="text-red-400 text-sm">{errors.year}</p>}
+    setIsLoading(true);
+    try {
+      const response = await fetch(`/api/languages?id=${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
 
-                {/* Description Input */}
-                <div className="flex items-start justify-between">
-                    <label className="text-white text-lg mt-2">Description:</label>
-                    <textarea
-                        name="description"
-                        value={formData.description}
-                        onChange={handleChange}
-                        placeholder="(Required: text)"
-                        className="w-2/3 px-3 py-2 h-24 rounded bg-white border-black"
-                        required
-                    ></textarea>
-                </div>
-                {errors.description && <p className="text-red-400 text-sm">{errors.description}</p>}
+      if (response.ok) {
+        router.push("/");
+      } else {
+        alert("Failed to update language.");
+      }
+    } catch (error) {
+      console.error("Update error:", error);
+      alert("An error occurred.");
+    } finally {
+      setIsLoading(false);
+    }
+  }
 
-                {/* Save Button */}
-                <div className="flex justify-center">
-                    <button type="submit" className="px-6 py-2 mt-4 bg-white hover:bg-gray-300">
-                        Save
-                    </button>
-                </div>
+  return (
+    <>
+      <Navbar />
+      <div className="flex flex-col items-center min-h-screen bg-gradient-to-b from-gray-900 to-black p-6">
+        <div className="w-full max-w-5xl">
+          <h1 className="text-4xl font-bold text-white mb-6">Edit Programming Language</h1>
+
+          <div className="bg-gray-800 p-8 rounded-lg">
+            <form onSubmit={handleSubmit} className="space-y-6">
+              {/* Name */}
+              <div>
+                <label className="block text-white text-lg mb-2">Name</label>
+                <input
+                  type="text"
+                  name="name"
+                  value={formData.name}
+                  onChange={handleChange}
+                  placeholder="Enter the name"
+                  className="w-full p-3 rounded bg-white text-black"
+                  required
+                />
+                {errors.name && <p className="text-red-400 text-sm mt-1">{errors.name}</p>}
+              </div>
+
+              {/* Developer */}
+              <div>
+                <label className="block text-white text-lg mb-2">Developer</label>
+                <input
+                  type="text"
+                  name="developer"
+                  value={formData.developer}
+                  onChange={handleChange}
+                  placeholder="Enter the developer"
+                  className="w-full p-3 rounded bg-white text-black"
+                  required
+                />
+                {errors.developer && <p className="text-red-400 text-sm mt-1">{errors.developer}</p>}
+              </div>
+
+              {/* Year */}
+              <div>
+                <label className="block text-white text-lg mb-2">Year Released</label>
+                <input
+                  type="number"
+                  name="year"
+                  value={formData.year}
+                  onChange={handleChange}
+                  placeholder="Enter the year"
+                  className="w-full p-3 rounded bg-white text-black"
+                  required
+                />
+                {errors.year && <p className="text-red-400 text-sm mt-1">{errors.year}</p>}
+              </div>
+
+              {/* Description */}
+              <div>
+                <label className="block text-white text-lg mb-2">Description</label>
+                <textarea
+                  name="description"
+                  value={formData.description}
+                  onChange={handleChange}
+                  placeholder="Enter the description"
+                  className="w-full p-3 h-32 rounded bg-white text-black"
+                  required
+                ></textarea>
+                {errors.description && <p className="text-red-400 text-sm mt-1">{errors.description}</p>}
+              </div>
+
+              {/* Save Button */}
+              <div className="flex justify-center">
+                <button
+                  type="submit"
+                  className="px-6 py-3 bg-green-600 text-white rounded hover:bg-green-700"
+                  disabled={isLoading}
+                >
+                  {isLoading ? "Saving..." : "Save Changes"}
+                </button>
+              </div>
             </form>
+          </div>
         </div>
-    );
+      </div>
+    </>
+  );
 }

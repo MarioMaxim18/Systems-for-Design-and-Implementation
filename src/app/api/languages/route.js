@@ -3,11 +3,21 @@ import Language from "../../../models/Language";
 import { NextResponse } from "next/server";
 import mongoose from "mongoose";
 
+
 export async function GET(req) {
   await dbConnect();
   const { searchParams } = new URL(req.url);
+  const id = searchParams.get("id");  
   const sortBy = searchParams.get("sortBy") || "ID";
   const userId = searchParams.get("userId");
+
+  if (id) {
+    const language = await Language.findById(id);
+    if (!language) {
+      return NextResponse.json({ error: "Language not found" }, { status: 404 });
+    }
+    return NextResponse.json(language);
+  }
 
   const sortOptions = {
     ID: "_id",

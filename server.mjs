@@ -15,7 +15,7 @@ function broadcast(data) {
     }
   });
 }
-
+3
 async function initializeId(retries = 10, delay = 1000) {
   const url = 'http://localhost:3000/api/languages?sortBy=ID';
 
@@ -26,7 +26,6 @@ async function initializeId(retries = 10, delay = 1000) {
       const languages = await response.json();
       const maxId = languages.reduce((max, lang) => Math.max(max, lang.id), 0);
       id = maxId + 1;
-      console.log(`🚀 Starting generation from ID ${id}`);
       return;
     } catch (err) {
       console.log(`🔁 Waiting for API to be ready... (${i + 1}/${retries})`);
@@ -53,7 +52,7 @@ function startGenerator() {
 }
 
 let interval;
-const PORT = 4001;
+const PORT = 4000;
 
 server.listen(PORT, async () => {
   console.log(`✅ WebSocket server running at ws://localhost:${PORT}`);

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter, usePathname } from "next/navigation";
-import { validateForm } from "../../lib/validation";
+import { validateForm } from "../../../lib/validation";
 
 export default function EditProgrammingLanguage() {
     const router = useRouter();
@@ -26,7 +26,7 @@ export default function EditProgrammingLanguage() {
                 if (response.ok) {
                     const data = await response.json();
                     const langToEdit = Array.isArray(data) ? 
-                        data.find(lang => lang.id === Number(id)) : data;
+                        data.find(lang => lang._id === Number(id)) : data;
                     
                     if (langToEdit) {
                         setFormData({

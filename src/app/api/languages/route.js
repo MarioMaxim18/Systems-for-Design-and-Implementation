@@ -1,78 +1,72 @@
-import { NextResponse } from 'next/server';
-import { getAllLanguages, addLanguage, updateLanguage, deleteLanguage } from '../../../data/data.js';
+import dbConnect from "../../../lib/dbConnect";
+import Language from "../../../models/Language";
+import { NextResponse } from "next/server";
+import mongoose from "mongoose";
 
+export async function GET(req) {
+  await dbConnect();
+  const { searchParams } = new URL(req.url);
+  const sortBy = searchParams.get("sortBy") || "ID";
+  const userId = searchParams.get("userId");
 
-// GET API: Retrieve all languages with sorting option
-export async function GET(request) {
-  const { searchParams } = new URL(request.url);
-  const sortBy = searchParams.get('sortBy') || "ID";
-  
-  let languages = getAllLanguages();
+  const sortOptions = {
+    ID: "_id",
+    Name: "name",
+    Year: "year",
+  };
 
-  if (sortBy === "Name") {
-    languages = languages.sort((a, b) => a.name.localeCompare(b.name));
-  } else if (sortBy === "Year") {
-    languages = languages.sort((a, b) => a.year - b.year);
-  } else if (sortBy === "ID") {
-    languages = languages.sort((a, b) => a.id - b.id);
+  const sortField = sortOptions[sortBy] || "_id";
+
+  if (!userId || !mongoose.Types.ObjectId.isValid(userId)) {
+    return NextResponse.json([]);
   }
 
+  const languages = await Language.find({ createdBy: userId }).sort({ [sortField]: 1 });
   return NextResponse.json(languages);
 }
 
-// POST API: Add a new language
-export async function POST(request) {
-  try {
-    const { name, developer, year, description } = await request.json();
-    const newLang = { name, developer, year, description };
-    const addedLang = addLanguage(newLang);
-    return NextResponse.json(addedLang, { status: 201 });
-  } catch (error) {
-    return NextResponse.json({ error: "Failed to add language" }, { status: 400 });
-  }
-}
-
-// PATCH API: Update a language by ID
-export async function PATCH(request) {
-  const { searchParams } = new URL(request.url);
-  const id = searchParams.get('id');
+export async function POST(req) {
+  await dbConnect();
+  const body = await req.json();
   
-  try {
-    const { name, developer, year, description } = await request.json();
-    const updatedLang = { name, developer, year, description };
-    const updated = updateLanguage(Number(id), updatedLang);
-    
-    // Return the updated language
-    return NextResponse.json(updated);
-  } catch (error) {
+  const { name, developer, year, description, createdBy } = body;
+
+  if (!name || !developer || !year || !description || !createdBy) {
     return NextResponse.json(
-      { error: "Failed to update language" }, 
+      { error: "Missing required fields." },
       { status: 400 }
     );
   }
+
+  try {
+    const newLang = await Language.create({
+      name,
+      developer,
+      year,
+      description,
+      createdBy,
+    });
+
+    return NextResponse.json(newLang, { status: 201 });
+  } catch (err) {
+    console.error("MongoDB insert error:", err);
+    return NextResponse.json({ error: "Failed to create language" }, { status: 500 });
+  }
 }
 
-// DELETE API: Delete a language by ID
-export async function DELETE(request) {
-  try {
-    const { searchParams } = new URL(request.url);
-    const id = searchParams.get('id');
-    
-    if (!id) {
-      return NextResponse.json(
-        { error: "ID parameter is required" },
-        { status: 400 }
-      );
-    }
+export async function PATCH(req) {
+  await dbConnect();
+  const { searchParams } = new URL(req.url);
+  const id = searchParams.get("id");
+  const data = await req.json();
+  const updated = await Language.findByIdAndUpdate(id, data, { new: true });
+  return NextResponse.json(updated);
+}
 
-    const deletedLang = deleteLanguage(parseInt(id));
-    return NextResponse.json(deletedLang);
-    
-  } catch (error) {
-    console.error('Delete error:', error);
-    return NextResponse.json(
-      { error: "Failed to delete language" },
-      { status: 500 }
-    );
-  }
+export async function DELETE(req) {
+  await dbConnect();
+  const { searchParams } = new URL(req.url);
+  const id = searchParams.get("id");
+  const deleted = await Language.findByIdAndDelete(id);
+  return NextResponse.json(deleted);
 }

@@ -26,9 +26,9 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-b from-gray-900 to-black p-6">
-      <div className="w-full max-w-md bg-gray-800 p-8 rounded-lg shadow-md">
-        <h2 className="text-3xl font-bold text-white mb-6 text-center">Register</h2>
+    <div className="min-h-screen bg-[#131414] flex items-center justify-center p-6">
+      <div className="w-full max-w-md bg-[#3a3a3a] p-8 rounded-lg shadow-md">
+        <h2 className="text-white text-2xl mb-6 font-bold text-center">Register</h2>
         <form onSubmit={handleRegister} className="flex flex-col gap-4">
           <input
             placeholder="Name"
@@ -54,7 +54,7 @@ export default function RegisterPage() {
           />
           <button
             type="submit"
-            className="p-3 mt-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded"
+            className="w-full bg-white text-black py-2 rounded hover:bg-gray-200 transition"
           >
             Register
           </button>

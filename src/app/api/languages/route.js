@@ -31,7 +31,13 @@ export async function GET(req) {
     return NextResponse.json([]);
   }
 
-  const languages = await Language.find({ createdBy: userId }).sort({ [sortField]: 1 });
+  const limit = parseInt(searchParams.get("limit")) || 10;
+  const offset = parseInt(searchParams.get("offset")) || 0;
+
+  const languages = await Language.find({ createdBy: userId })
+  .sort({ [sortField]: 1 })
+  .skip(offset)
+  .limit(limit);
   return NextResponse.json(languages);
 }
 

@@ -74,85 +74,80 @@ export default function EditProgrammingLanguage() {
   return (
     <>
       <Navbar />
-      <div className="flex flex-col items-center min-h-screen bg-gradient-to-b from-gray-900 to-black p-6">
-        <div className="w-full max-w-5xl">
-          <h1 className="text-4xl font-bold text-white mb-6">Edit Programming Language</h1>
-
-          <div className="bg-gray-800 p-8 rounded-lg">
-            <form onSubmit={handleSubmit} className="space-y-6">
-              {/* Name */}
-              <div>
-                <label className="block text-white text-lg mb-2">Name</label>
-                <input
-                  type="text"
-                  name="name"
-                  value={formData.name}
-                  onChange={handleChange}
-                  placeholder="Enter the name"
-                  className="w-full p-3 rounded bg-white text-black"
-                  required
-                />
-                {errors.name && <p className="text-red-400 text-sm mt-1">{errors.name}</p>}
-              </div>
-
-              {/* Developer */}
-              <div>
-                <label className="block text-white text-lg mb-2">Developer</label>
-                <input
-                  type="text"
-                  name="developer"
-                  value={formData.developer}
-                  onChange={handleChange}
-                  placeholder="Enter the developer"
-                  className="w-full p-3 rounded bg-white text-black"
-                  required
-                />
-                {errors.developer && <p className="text-red-400 text-sm mt-1">{errors.developer}</p>}
-              </div>
-
-              {/* Year */}
-              <div>
-                <label className="block text-white text-lg mb-2">Year Released</label>
-                <input
-                  type="number"
-                  name="year"
-                  value={formData.year}
-                  onChange={handleChange}
-                  placeholder="Enter the year"
-                  className="w-full p-3 rounded bg-white text-black"
-                  required
-                />
-                {errors.year && <p className="text-red-400 text-sm mt-1">{errors.year}</p>}
-              </div>
-
-              {/* Description */}
-              <div>
-                <label className="block text-white text-lg mb-2">Description</label>
-                <textarea
-                  name="description"
-                  value={formData.description}
-                  onChange={handleChange}
-                  placeholder="Enter the description"
-                  className="w-full p-3 h-32 rounded bg-white text-black"
-                  required
-                ></textarea>
-                {errors.description && <p className="text-red-400 text-sm mt-1">{errors.description}</p>}
-              </div>
-
-              {/* Save Button */}
-              <div className="flex justify-center">
-                <button
-                  type="submit"
-                  className="px-6 py-3 bg-green-600 text-white rounded hover:bg-green-700"
-                  disabled={isLoading}
-                >
-                  {isLoading ? "Saving..." : "Save Changes"}
-                </button>
-              </div>
-            </form>
-          </div>
+    <div className="flex flex-col items-center justify-center min-h-screen bg-[#131414]">
+        <div className="w-[800px] flex flex-col items-start mb-4">
+            <h2 className="text-xl text-white mb-2">Edit Programming Language</h2>
         </div>
-      </div>
+
+        {/* Form Container */}
+        <form onSubmit={handleSubmit} className="bg-[#515151] p-8 rounded-lg w-[800px] space-y-4">
+            {/* Name Input */}
+            <div className="flex items-center justify-between">
+                <label className="text-white text-lg">Name:</label>
+                <input
+                    type="text"
+                    name="name"
+                    value={formData.name}
+                    onChange={handleChange}
+                    placeholder="(Required: text)"
+                    className="w-2/3 px-3 py-2 rounded bg-white border-black"
+                    required
+                />
+            </div>
+            {errors.name && <p className="text-red-400 text-sm">{errors.name}</p>}
+
+            {/* Developer Input */}
+            <div className="flex items-center justify-between">
+                <label className="text-white text-lg">Developer:</label>
+                <input
+                    type="text"
+                    name="developer"
+                    value={formData.developer}
+                    onChange={handleChange}
+                    placeholder="(Required: text)"
+                    className="w-2/3 px-3 py-2 rounded bg-white border-black"
+                    required
+                />
+            </div>
+            {errors.developer && <p className="text-red-400 text-sm">{errors.developer}</p>}
+
+            {/* Year Released Input */}
+            <div className="flex items-center justify-between">
+                <label className="text-white text-lg">Year released:</label>
+                <input
+                    type="number"
+                    name="year"
+                    value={formData.year}
+                    onChange={handleChange}
+                    placeholder="(Required: valid year)"
+                    className="w-2/3 px-3 py-2 rounded bg-white border-black"
+                    required
+                />
+            </div>
+            {errors.year && <p className="text-red-400 text-sm">{errors.year}</p>}
+
+            {/* Description Input */}
+            <div className="flex items-start justify-between">
+                <label className="text-white text-lg mt-2">Description:</label>
+                <textarea
+                    name="description"
+                    value={formData.description}
+                    onChange={handleChange}
+                    placeholder="(Required: text)"
+                    className="w-2/3 px-3 py-2 h-24 rounded bg-white border-black"
+                    required
+                ></textarea>
+            </div>
+            {errors.description && <p className="text-red-400 text-sm">{errors.description}</p>}
+
+            {/* Save Button */}
+            <div className="flex justify-center">
+                <button type="submit" className="px-6 py-2 mt-4 bg-white hover:bg-gray-300">
+                    Save
+                </button>
+            </div>
+        </form>
+    </div>
     </>
-  );
+);
 }

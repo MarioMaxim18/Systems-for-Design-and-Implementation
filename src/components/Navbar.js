@@ -15,25 +15,27 @@ export default function Navbar() {
   const handleLogout = () => {
     localStorage.removeItem("user");
     setUser(null);
-    router.refresh(); 
+    window.location.reload();
   };
 
   return (
-    <nav className="w-full bg-gray-900 text-white px-6 py-4 flex justify-end items-center shadow-md">
+    <nav className="w-full bg-[#131414] px-8 py-4 flex justify-between items-center shadow-md border-b border-[#333]">
+      <h1 className="text-white text-xl font-semibold">📚 My Learning</h1>
+
       {user ? (
         <div className="flex items-center gap-4">
-          <span className="text-sm">{user.name}</span>
+          <span className="text-white text-sm font-medium">{user.name}</span>
           <button
-            className="bg-red-600 hover:bg-red-700 px-4 py-2 rounded text-white"
             onClick={handleLogout}
+            className="bg-red-600 hover:bg-red-700 px-4 py-2 rounded text-white text-sm font-semibold transition"
           >
             Logout
           </button>
         </div>
       ) : (
         <div className="flex items-center gap-4">
-          <a href="/register" className="hover:underline">Register</a>
-          <a href="/login" className="hover:underline">Login</a>
+          <a href="/register" className="text-white text-sm font-medium hover:text-blue-400 transition">Register</a>
+          <a href="/login" className="text-white text-sm font-medium hover:text-blue-400 transition">Login</a>
         </div>
       )}
     </nav>

@@ -17,7 +17,7 @@ function broadcast(data) {
 }
 3
 async function initializeId(retries = 10, delay = 1000) {
-  const url = 'http://localhost:3000/api/languages?sortBy=ID';
+  const url = 'http://localhost:3000/api/languages?sortBy=ID';  
 
   for (let i = 0; i < retries; i++) {
     try {

@@ -7,6 +7,12 @@ export async function POST(req) {
   await dbConnect();
   const { name, email, password } = await req.json();
 
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+  if (!emailRegex.test(email)) {
+    return NextResponse.json({ error: "Invalid email format" }, { status: 400 });
+  }
+
   const existingUser = await User.findOne({ email });
   if (existingUser) {
     return NextResponse.json({ error: "User already exists" }, { status: 400 });

@@ -1,13 +1,22 @@
 import dbConnect from "../../../lib/dbConnect";
 import Language from "../../../models/Language";
+import Log from "../../../models/Log";
 import { NextResponse } from "next/server";
 import mongoose from "mongoose";
 
+async function logAction(userId, action) {
+  if (!userId || !mongoose.Types.ObjectId.isValid(userId)) return;
+  try {
+    await Log.create({ userId, action });
+  } catch (err) {
+    console.error("Failed to log action:", err);
+  }
+}
 
 export async function GET(req) {
   await dbConnect();
   const { searchParams } = new URL(req.url);
-  const id = searchParams.get("id");  
+  const id = searchParams.get("id");
   const sortBy = searchParams.get("sortBy") || "ID";
   const userId = searchParams.get("userId");
 
@@ -35,9 +44,9 @@ export async function GET(req) {
   const offset = parseInt(searchParams.get("offset")) || 0;
 
   const languages = await Language.find({ createdBy: userId })
-  .sort({ [sortField]: 1 })
-  .skip(offset)
-  .limit(limit);
+    .sort({ [sortField]: 1 })
+    .skip(offset)
+    .limit(limit);
   return NextResponse.json(languages);
 }
 
@@ -63,6 +72,7 @@ export async function POST(req) {
       createdBy,
     });
 
+    await logAction(createdBy, "CREATE");
     return NextResponse.json(newLang, { status: 201 });
   } catch (err) {
     console.error("MongoDB insert error:", err);
@@ -75,7 +85,14 @@ export async function PATCH(req) {
   const { searchParams } = new URL(req.url);
   const id = searchParams.get("id");
   const data = await req.json();
+
+  const original = await Language.findById(id); 
+  if (!original) {
+    return NextResponse.json({ error: "Language not found" }, { status: 404 });
+  }
+
   const updated = await Language.findByIdAndUpdate(id, data, { new: true });
+  await logAction(original.createdBy, "UPDATE"); ƒ
   return NextResponse.json(updated);
 }
 
@@ -83,6 +100,10 @@ export async function DELETE(req) {
   await dbConnect();
   const { searchParams } = new URL(req.url);
   const id = searchParams.get("id");
+
   const deleted = await Language.findByIdAndDelete(id);
+  if (deleted?.createdBy) {
+    await logAction(deleted.createdBy, "DELETE");
+  }
   return NextResponse.json(deleted);
 }

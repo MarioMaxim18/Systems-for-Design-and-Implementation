@@ -4,19 +4,22 @@
   "private": true,
   "scripts": {
     "predev": "node scripts/kill-port.mjs",
-    "dev": "concurrently \"next dev -p 3000\" \"node server.mjs\"",
+    "dev": "concurrently \"next dev -p 3000\" \"node server.mjs\" \"node src/monitorRunner.mjs\"",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
     "test": "jest",
     "test:coverage": "jest --coverage",
     "seedL": "node scripts/seedLanguages.js",
-    "seedU": "node scripts/seedUsers.js"
+    "seedU": "node scripts/seedUsers.js",
+    "simulateAttack": "node scripts/simulateHeavyAttack.mjs"
   },
   "dependencies": {
     "@faker-js/faker": "^9.7.0",
     "bcryptjs": "^3.0.2",
+    "date-fns": "^4.1.0",
     "dotenv": "^16.5.0",
+    "express": "^5.1.0",
     "formidable": "^3.5.2",
     "mongoose": "^8.14.1",
     "next": "^15.2.2",

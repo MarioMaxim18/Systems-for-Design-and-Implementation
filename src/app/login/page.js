@@ -7,10 +7,10 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const router = useRouter();
-
+  
   async function handleLogin(e) {
     e.preventDefault();
-
+  
     try {
       const response = await fetch("/api/login", {
         method: "POST",
@@ -19,12 +19,23 @@ export default function LoginPage() {
         },
         body: JSON.stringify({ email, password }),
       });
-
+  
       const result = await response.json();
-
+  
       if (response.ok) {
-        localStorage.setItem("user", JSON.stringify({ _id: result.userId, name: result.name }));
-        router.push("/");
+        const user = {
+          _id: result.userId,
+          name: result.name,
+          role: result.role,
+        };
+  
+        localStorage.setItem("user", JSON.stringify(user));
+  
+        if (user.role === "admin") {
+          router.push("/admin");
+        } else {
+          router.push("/");
+        }
       } else {
         setError(result.error || "Login failed");
       }

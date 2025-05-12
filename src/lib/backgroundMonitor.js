@@ -1,7 +1,7 @@
 import { monitorLogs } from '../utils/monitorLogs.js';
 
 class BackgroundMonitor {
-  constructor(interval = 10 * 1000) { // ✅ Every 10 seconds
+  constructor(interval = 10 * 1000) {
     this.interval = interval;
     this.isRunning = false;
     this.timer = null;

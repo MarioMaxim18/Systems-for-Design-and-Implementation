@@ -23,9 +23,9 @@ export async function GET(req) {
   if (id) {
     const language = await Language.findById(id);
     if (!language) {
-      return NextResponse.json({ error: "Language not found" }, { status: 404 });
+      return Response.json({ error: "Language not found" }, { status: 404 });
     }
-    return NextResponse.json(language);
+    return Response.json(language);
   }
 
   const sortOptions = {
@@ -37,7 +37,7 @@ export async function GET(req) {
   const sortField = sortOptions[sortBy] || "_id";
 
   if (!userId || !mongoose.Types.ObjectId.isValid(userId)) {
-    return NextResponse.json([]);
+    return Response.json([]);
   }
 
   const limit = parseInt(searchParams.get("limit")) || 10;
@@ -47,7 +47,7 @@ export async function GET(req) {
     .sort({ [sortField]: 1 })
     .skip(offset)
     .limit(limit);
-  return NextResponse.json(languages);
+  return Response.json(languages);
 }
 
 export async function POST(req) {
@@ -57,7 +57,7 @@ export async function POST(req) {
   const { name, developer, year, description, createdBy } = body;
 
   if (!name || !developer || !year || !description || !createdBy) {
-    return NextResponse.json(
+    return Response.json(
       { error: "Missing required fields." },
       { status: 400 }
     );
@@ -73,10 +73,10 @@ export async function POST(req) {
     });
 
     await logAction(createdBy, "CREATE");
-    return NextResponse.json(newLang, { status: 201 });
+    return Response.json(newLang, { status: 201 });
   } catch (err) {
     console.error("MongoDB insert error:", err);
-    return NextResponse.json({ error: "Failed to create language" }, { status: 500 });
+    return Response.json({ error: "Failed to create language" }, { status: 500 });
   }
 }
 
@@ -88,12 +88,12 @@ export async function PATCH(req) {
 
   const original = await Language.findById(id); 
   if (!original) {
-    return NextResponse.json({ error: "Language not found" }, { status: 404 });
+    return Response.json({ error: "Language not found" }, { status: 404 });
   }
 
   const updated = await Language.findByIdAndUpdate(id, data, { new: true });
-  await logAction(original.createdBy, "UPDATE"); ƒ
-  return NextResponse.json(updated);
+  await logAction(original.createdBy, "UPDATE");
+  return Response.json(updated);
 }
 
 export async function DELETE(req) {
@@ -105,5 +105,5 @@ export async function DELETE(req) {
   if (deleted?.createdBy) {
     await logAction(deleted.createdBy, "DELETE");
   }
-  return NextResponse.json(deleted);
+  return Response.json(deleted);
 }

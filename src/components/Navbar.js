@@ -20,7 +20,7 @@ export default function Navbar() {
 
   return (
     <nav className="w-full bg-[#131414] px-8 py-4 flex justify-between items-center shadow-md border-b border-[#333]">
-      <h1 className="text-white text-xl font-semibold">My Learning</h1>
+      <div></div>
 
       {user ? (
         <div className="flex items-center gap-4">

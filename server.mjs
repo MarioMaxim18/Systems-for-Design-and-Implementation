@@ -3,9 +3,9 @@ import http from 'http';
 import fetch from 'node-fetch';
 
 const server = http.createServer();
-const wss = new WebSocketServer({ 
+const wss = new WebSocketServer({
   server,
-  path: '/ws'  // Match the path in vercel.json
+  path: '/ws'
 });
 
 let id = 1;

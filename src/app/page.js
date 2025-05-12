@@ -123,7 +123,10 @@ export default function Home() {
   }, [isOnline, serverUp]);
 
   useEffect(() => {
-    const ws = new WebSocket("ws://localhost:4001");
+    const wsProtocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
+    const wsHost = window.location.host;
+    const ws = new WebSocket(`${wsProtocol}://${wsHost}/ws`);
+    
     ws.onmessage = (event) => {
       const message = JSON.parse(event.data);
       if (message.type === "new_entity" && user?._id && message.data.createdBy === user._id) {
@@ -131,6 +134,11 @@ export default function Home() {
         setHasMore(true);
       }
     };
+    
+    ws.onerror = (error) => {
+      console.error('WebSocket error:', error);
+    };
+
     return () => ws.close();
   }, [user]);
 

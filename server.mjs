@@ -1,9 +1,12 @@
 import { WebSocketServer } from 'ws';
 import http from 'http';
-import fetch from 'node-fetch'; 
+import fetch from 'node-fetch';
 
 const server = http.createServer();
-const wss = new WebSocketServer({ server });
+const wss = new WebSocketServer({ 
+  server,
+  path: '/ws'  // Match the path in vercel.json
+});
 
 let id = 1;
 let generate = false; // Flag to control generation
@@ -15,9 +18,11 @@ function broadcast(data) {
     }
   });
 }
-3
+
 async function initializeId(retries = 10, delay = 1000) {
-  const url = 'http://localhost:3000/api/languages?sortBy=ID';  
+  const protocol = process.env.VERCEL_URL ? 'https' : 'http';
+  const host = process.env.VERCEL_URL || 'localhost:3000';
+  const url = `${protocol}://${host}/api/languages?sortBy=ID`;
 
   for (let i = 0; i < retries; i++) {
     try {
@@ -52,10 +57,10 @@ function startGenerator() {
 }
 
 let interval;
-const PORT = 4000;
+const PORT = process.env.PORT || 4000;
 
 server.listen(PORT, async () => {
-  console.log(`✅ WebSocket server running at ws://localhost:${PORT}`);
+  console.log(`✅ WebSocket server running on port ${PORT}`);
   await initializeId();
   interval = startGenerator();
 });

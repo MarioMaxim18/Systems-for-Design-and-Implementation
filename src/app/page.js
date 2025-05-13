@@ -122,26 +122,6 @@ export default function Home() {
     if (isOnline && serverUp) syncQueue(() => setRefreshKey((k) => k + 1));
   }, [isOnline, serverUp]);
 
-  useEffect(() => {
-    const wsProtocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
-    const wsHost = window.location.host;
-    const ws = new WebSocket(`${wsProtocol}://${wsHost}/ws`);
-    
-    ws.onmessage = (event) => {
-      const message = JSON.parse(event.data);
-      if (message.type === "new_entity" && user?._id && message.data.createdBy === user._id) {
-        setLanguages((prev) => [message.data, ...prev]);
-        setHasMore(true);
-      }
-    };
-    
-    ws.onerror = (error) => {
-      console.error('WebSocket error:', error);
-    };
-
-    return () => ws.close();
-  }, [user]);
-
   return (
     <>
       <Navbar />

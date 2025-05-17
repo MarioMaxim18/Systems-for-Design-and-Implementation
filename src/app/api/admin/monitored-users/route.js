@@ -29,12 +29,10 @@ export async function GET(req) {
 
   try {
     const monitoredUsers = await MonitoredUser.find()
-      .sort({ flaggedAt: -1 })
-      .populate('userId', 'name email status');
-
+      .populate('userId');
     return NextResponse.json(monitoredUsers);
   } catch (error) {
-    console.error("❌ Failed to fetch monitored users:", error);
+    console.error("Failed to fetch monitored users:", error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
@@ -48,34 +46,4 @@ export async function POST(req) {
   await dbConnect();
   const body = await req.json();
   const { userId, action } = body;
-  
-  try {
-    switch (action) {
-      case 'unflag':
-        await MonitoredUser.deleteOne({ userId });
-        await User.findByIdAndUpdate(userId, { status: 'active' });
-        return NextResponse.json({ success: true, message: "User unflagged" });
-        
-      case 'suspend':
-        await User.findByIdAndUpdate(userId, { status: 'suspended' });
-        await MonitoredUser.findOneAndUpdate(
-          { userId },
-          { 
-            $push: { 
-              actionsTaken: { 
-                action: 'SUSPEND_USER', 
-                by: body.adminId,
-                timestamp: new Date()
-              } 
-            } 
-          }
-        );
-        return NextResponse.json({ success: true, message: "User suspended" });
-        
-      default:
-        return NextResponse.json({ error: "Invalid action" }, { status: 400 });
-    }
-  } catch (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
-  }
 }

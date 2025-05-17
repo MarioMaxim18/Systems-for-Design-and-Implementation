@@ -8,13 +8,7 @@ const UserSchema = new mongoose.Schema({
     type: String, 
     enum: ['user', 'admin'], 
     default: 'user' 
-  },
-  status: {
-    type: String,
-    enum: ['active', 'suspended', 'monitoring'],
-    default: 'active'
-  },
-  createdAt: { type: Date, default: Date.now }
+  }
 });
 
 export default mongoose.models.User || mongoose.model("User", UserSchema);

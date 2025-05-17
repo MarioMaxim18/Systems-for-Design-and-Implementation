@@ -15,12 +15,7 @@ export default function AdminDashboard() {
     const storedUser = localStorage.getItem('user');
     if (storedUser) {
       const parsedUser = JSON.parse(storedUser);
-      console.log("🧠 Loaded user from localStorage:", parsedUser);
       setUser(parsedUser);
-
-      if (parsedUser.role !== 'admin') {
-        router.push('/dashboard');
-      }
     } else {
       router.push('/login');
     }

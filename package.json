@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "predev": "node scripts/kill-port.mjs",
-    "dev": "concurrently \"next dev -p 3000\" \"node server.mjs\" \"node src/monitorRunner.mjs\"",
+    "dev": "concurrently \"next dev -p 3000\" \"node src/monitorRunner.mjs\"",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",

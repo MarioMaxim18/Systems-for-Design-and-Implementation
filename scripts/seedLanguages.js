@@ -26,14 +26,14 @@ async function seedUsers() {
   }));
 
   const insertedUsers = await User.insertMany(users);
-  console.log("✅ Seeded 100000 users.");
+  console.log("Seeded 100000 users.");
   return insertedUsers.map((u) => u._id);
 }
 
 async function seedLanguages() {
     await dbConnect();
   
-    const fakeUserId = "68163dc8ee063c17bc6da95b"; // use a real user ID
+    const fakeUserId = ""; // use a real user ID
     const languages = Array.from({ length: 100_000 }).map(() => ({
       name: faker.lorem.word(),
       developer: faker.company.name(),

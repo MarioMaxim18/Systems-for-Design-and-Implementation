@@ -6,7 +6,6 @@ import { useRouter, usePathname } from "next/navigation";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import generateFakeData from "../utils/generateFakeData";
 import { useConnectionStatus } from "../hooks/useConnectionStatus";
-import { syncQueue } from "../utils/offlineQueue";
 
 export default function Home() {
   const router = useRouter();
@@ -117,10 +116,6 @@ export default function Home() {
 
   const chartData = getLanguagesByDecade(languages);
   const { isOnline, serverUp } = useConnectionStatus();
-
-  useEffect(() => {
-    if (isOnline && serverUp) syncQueue(() => setRefreshKey((k) => k + 1));
-  }, [isOnline, serverUp]);
 
   return (
     <>

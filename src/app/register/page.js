@@ -11,7 +11,7 @@ export default function RegisterPage() {
   async function handleRegister(e) {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
-      alert("❌ Please enter a valid email address.");
+      alert("Please enter a valid email address.");
       return;
     }
     e.preventDefault();
@@ -23,10 +23,10 @@ export default function RegisterPage() {
 
     const data = await res.json();
     if (res.ok) {
-      alert("✅ Registered successfully!");
+      alert("Registered successfully!");
       router.push("/login");
     } else {
-      alert("❌ " + data.error);
+      alert(data.error);
     }
   }
 

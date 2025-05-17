@@ -1,6 +1,5 @@
-// src/lib/dbConnect.js
 import mongoose from 'mongoose';
-import 'dotenv/config'; // Add this line to load environment variables
+import 'dotenv/config';
 
 const MONGODB_URI = process.env.MONGODB_URI;
 

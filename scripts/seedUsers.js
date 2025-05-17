@@ -33,7 +33,7 @@ async function seedUsers() {
     }
   }
   const inserted = await User.insertMany(users);
-  console.log(" Seeded", inserted.length, "users.");
+  console.log("Seeded", inserted.length, "users.");
   mongoose.connection.close();
 }
 

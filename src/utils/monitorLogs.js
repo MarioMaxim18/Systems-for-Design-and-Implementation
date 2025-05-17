@@ -55,8 +55,8 @@ async function flagSuspiciousUser(userId, reason) {
       { upsert: true }
     );
 
-    console.log(`🚨 Flagged user ${userName} (${userId}) - ${reason}`);
+    console.log(`Flagged user ${userName} (${userId}) - ${reason}`);
   } catch (err) {
-    console.error(`❌ Failed to flag user ${userId}:`, err);
+    console.error(`Failed to flag user ${userId}:`, err);
   }
 }

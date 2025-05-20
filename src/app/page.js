@@ -5,7 +5,6 @@ import { useState, useEffect, useRef } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import generateFakeData from "../utils/generateFakeData";
-import { useConnectionStatus } from "../hooks/useConnectionStatus";
 
 export default function Home() {
   const router = useRouter();
@@ -115,18 +114,11 @@ export default function Home() {
   };
 
   const chartData = getLanguagesByDecade(languages);
-  const { isOnline, serverUp } = useConnectionStatus();
 
   return (
     <>
       <Navbar />
     <div className="flex flex-col items-center justify-center min-h-screen bg-[#131414]">
-      {!isOnline && (
-        <div className="fixed top-0 left-0 w-full bg-red-600 text-white text-center py-2 z-50 shadow-md">
-          ⚠️ You are <strong>offline</strong> — check your internet connection.
-        </div>
-      )}
-      
       <div className="w-[800px] flex flex-col items-start mb-4 mt-4">
         <div>
           <label className="text-white text-lg mr-2">Sort by:</label>

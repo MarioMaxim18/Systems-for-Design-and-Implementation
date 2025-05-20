@@ -1,7 +1,6 @@
 import dbConnect from "../../../lib/dbConnect";
 import Language from "../../../models/Language";
 import Log from "../../../models/Log";
-import { NextResponse } from "next/server";
 import mongoose from "mongoose";
 
 async function logAction(userId, action) {

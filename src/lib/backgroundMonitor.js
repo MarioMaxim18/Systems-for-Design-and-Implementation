@@ -8,14 +8,9 @@ class BackgroundMonitor {
   }
 
   start() {
-    if (this.isRunning) {
-      console.log('Background monitor already running');
-      return;
-    }
+    if (this.isRunning) return;
 
-    console.log('Starting background monitor service');
     this.isRunning = true;
-    
     this.runMonitor();
     
     this.timer = setInterval(() => {
@@ -25,7 +20,6 @@ class BackgroundMonitor {
 
   async runMonitor() {
     try {
-      console.log(`Running monitor check at ${new Date().toISOString()}`);
       await monitorLogs();
     } catch (error) {
       console.error('Error in background monitor:', error);
@@ -33,12 +27,8 @@ class BackgroundMonitor {
   }
 
   stop() {
-    if (!this.isRunning) {
-      console.log('Background monitor is not running');
-      return;
-    }
+    if (!this.isRunning) return;
 
-    console.log('Stopping background monitor service');
     clearInterval(this.timer);
     this.timer = null;
     this.isRunning = false;

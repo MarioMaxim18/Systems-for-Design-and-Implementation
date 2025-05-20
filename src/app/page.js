@@ -179,13 +179,13 @@ export default function Home() {
                       }
 
                       const result = await response.json();
-                      console.log('✅ Delete successful:', result);
+                      console.log('Delete successful:', result);
 
                       const updatedLanguages = languages.filter(l => l._id !== lang._id);
                       setLanguages(updatedLanguages);
 
                     } catch (error) {
-                      console.error('❌ Error deleting language:', error);
+                      console.error('Error deleting language:', error);
                       alert('Failed to delete language. Please check console for details.');
                     }
                   }
@@ -233,10 +233,10 @@ export default function Home() {
 
               if (!res.ok) throw new Error("Upload failed");
               const json = await res.json();
-              alert(`✅ Uploaded: ${json.filename}`);
+              alert(`Uploaded: ${json.filename}`);
               setUploadedFile(json.filename);
             } catch (err) {
-              console.error("❌ Upload error:", err);
+              console.error("Upload error:", err);
               alert("Upload failed. Check console.");
             }
           }}
